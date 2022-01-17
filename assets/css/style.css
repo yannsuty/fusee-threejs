@@ -12,3 +12,7 @@ canvas {
 nav {
 	position: fixed;
 }
+
+button {
+	margin: 5px
+}
