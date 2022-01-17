@@ -16,3 +16,7 @@ nav {
 button {
 	margin: 5px
 }
+
+.active button {
+	background-color: green;
+}
