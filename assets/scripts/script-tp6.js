@@ -16,7 +16,7 @@ function init() {
 
     /********CAMERA***********/
     camera = new three.PerspectiveCamera(20, window.innerWidth/window.innerHeight,1,1000)
-    camera.position.set(0,20,100)
+    camera.position.set(0,10,300)
     camera.lookAt(new three.Vector3(0,10,0))
     scene.add(camera)
 
@@ -24,7 +24,7 @@ function init() {
     let ambientLight = new three.AmbientLight(0xcccccc,0.2)
     scene.add(ambientLight)
     directionalLight = new three.DirectionalLight( 0xffffff, 0.6 )
-    directionalLight.position.y = 2
+    directionalLight.position.y = 10
     directionalLight.position.x = -150
     scene.add( directionalLight )
 
@@ -50,7 +50,7 @@ function add_objects() {
         new three.SphereGeometry(10,100,100),
         new three.MeshBasicMaterial( {color: 0xffff00} ))
     sun_mesh.position.x=-150
-    sun_mesh.position.y=2
+    sun_mesh.position.y=10
 
     scene.add(sun_mesh)
 }
@@ -70,13 +70,17 @@ function render() {
 }
 
 document.body.addEventListener("wheel",ev=>{
+    let r = Math.sqrt(Math.pow(camera.position.x,2)+Math.pow(camera.position.z,2))+0.1
     if (ev.wheelDelta>0) {
         camera.position.y+=0.1
-        camera.position.z+=1
+        camera.position.x+=camera.position.x/r
+        camera.position.z+=camera.position.z/r
     } else {
         camera.position.y-=0.1
-        camera.position.z-=1
+        camera.position.x-=camera.position.x/r
+        camera.position.z-=camera.position.z/r
     }
+    camera.lookAt(new three.Vector3(0,10,0))
 })
 
 let drag=false, oldX, dX=0, angle=Math.PI
@@ -98,9 +102,9 @@ window.onmousemove=function(event) {
     } else if (dX<0) {
         angle +=0.1
     }
-    let r=camera.position.x+camera.position.z
-    camera.position.x=100*Math.cos(angle)
-    camera.position.z=100*Math.sin(angle)
+    let r=Math.sqrt(Math.pow(camera.position.x,2)+Math.pow(camera.position.z,2))
+    camera.position.x=r*Math.cos(angle)
+    camera.position.z=r*Math.sin(angle)
     camera.lookAt(new three.Vector3(0,10,0))
 
     oldX=event.clientX
