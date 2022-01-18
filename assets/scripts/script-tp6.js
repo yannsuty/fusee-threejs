@@ -1,5 +1,5 @@
-import * as three from './three/three.js'
-import {FBXLoader} from "./three/FBXLoader.js";
+import * as three from '../../libs/three/three.js'
+import {FBXLoader} from "../../libs/three/FBXLoader.js";
 
 let scene, renderer, camera
 let directionalLight, sun_mesh
