@@ -1,7 +1,8 @@
 import * as three from '../../libs/three/three.js'
 import {FBXLoader} from "../../libs/three/FBXLoader.js";
+import {OrbitControls} from "../../libs/three/OrbitControls.js";
 
-let scene, renderer, camera
+let scene, renderer, camera, controls
 let directionalLight
 let rocket, mixer
 let clock = new three.Clock()
@@ -30,7 +31,14 @@ function init() {
     directionalLight.position.x = -150
     scene.add( directionalLight )
 
+    /********CONTROLS***********/
+    controls=new OrbitControls(camera, renderer.domElement)
+    controls.enableDamping=true
+    controls.dampingFactor=0.05
+    controls.maxPolarAngle=Math.PI/2
+
     add_objects()
+    render()
 }
 
 function add_objects() {
@@ -43,60 +51,17 @@ function add_objects() {
         console.log(rocket.animations)
         mixer.clipAction(tmp).play()
         scene.add(rocket)
-        render()
     })
 }
 
 function render() {
     let delta = clock.getDelta()
-    mixer.update(delta)
+    if (rocket) mixer.update(delta)
+    controls.update()
     renderer.render( scene, camera );
 
     //Create the loop
     requestAnimationFrame( render );
 }
-
-document.body.addEventListener("wheel",ev=>{
-    let lookAt = new three.Vector3(camera.lookAt.x,camera.lookAt.y,camera.lookAt.z)
-    let r = Math.sqrt(Math.pow(camera.position.x,2)+Math.pow(camera.position.z,2))+0.1
-    if (ev.wheelDelta>0) {
-        camera.position.y+=0.1
-        camera.position.x+=camera.position.x/r
-        camera.position.z+=camera.position.z/r
-    } else {
-        camera.position.y-=0.1
-        camera.position.x-=camera.position.x/r
-        camera.position.z-=camera.position.z/r
-    }
-    camera.lookAt(lookAt)
-})
-
-let drag=false, oldX, oldY, dX=0, dY, angle=Math.PI
-window.onmousedown=function(event) {
-    drag=true;
-    oldX=event.clientX
-};
-
-window.onmouseup=function() {
-    drag=false;
-};
-
-window.onmousemove=function(event) {
-    if (!drag) return false;
-
-    let lookAt = new three.Vector3(camera.lookAt.x,camera.lookAt.y,camera.lookAt.z)
-    dX=event.clientX-oldX
-    if (dX>0) {
-        angle -=0.1
-    } else if (dX<0) {
-        angle +=0.1
-    }
-    let r=Math.sqrt(Math.pow(camera.position.x,2)+Math.pow(camera.position.z,2))
-    camera.position.x=r*Math.cos(angle)
-    camera.position.z=r*Math.sin(angle)
-    camera.lookAt(lookAt)
-
-    oldX=event.clientX
-};
 
 init()
