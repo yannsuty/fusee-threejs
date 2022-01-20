@@ -1,6 +1,7 @@
 import * as three from '../../libs/three/three.js'
+import {OrbitControls} from "../../libs/three/OrbitControls.js";
 
-let scene, renderer, camera
+let scene, renderer, camera, controls
 let directionalLight, sun_mesh
 let clock = new three.Clock()
 
@@ -16,7 +17,11 @@ function AmmoStart() {
     initGraphicsUniverse()
 
     //Cube de soutien
-    createCube(40,new three.Vector3(-10,-30,-10),0)
+    createCube(40,new three.Vector3(-10,-20,-10),0)
+    //Ramp
+    createParallelepipedRectangle(new three.Vector3(10,2,10),new three.Vector3(-10,0,-27),0, {x: 0.383, y: -Math.PI/4, z: 0, w:  0.924})
+    //Cube destroyer
+    createCube(4,new three.Vector3(-10,500,-27),20)
 
     //Falling cubes
     createCube(4,new three.Vector3(0,10,0),1,null)
@@ -39,6 +44,48 @@ function AmmoStart() {
     createCube(2,new three.Vector3(0,180,0),1,null)
     createCube(2,new three.Vector3(0,190,0),1,null)
     createCube(2,new three.Vector3(0,200,0),1,null)
+    createCube(2,new three.Vector3(0,210,0),1,null)
+    createCube(2,new three.Vector3(0,220,0),1,null)
+    createCube(2,new three.Vector3(0,230,0),1,null)
+    createCube(2,new three.Vector3(0,240,0),1,null)
+    createCube(2,new three.Vector3(0,250,0),1,null)
+    createCube(2,new three.Vector3(0,260,0),1,null)
+    createCube(2,new three.Vector3(0,270,0),1,null)
+    createCube(2,new three.Vector3(0,280,0),1,null)
+    createCube(2,new three.Vector3(0,290,0),1,null)
+    createCube(2,new three.Vector3(0,300,0),1,null)
+
+    //Wall of cube
+    createCube(2,new three.Vector3(-20,0,-20),1,null)
+    createCube(2,new three.Vector3(-20,2,-20),1,null)
+    createCube(2,new three.Vector3(-20,4,-20),1,null)
+    createCube(2,new three.Vector3(-20,6,-20),1,null)
+    createCube(2,new three.Vector3(-20,8,-20),1,null)
+    createCube(2,new three.Vector3(-20,10,-20),1,null)
+    createCube(2,new three.Vector3(-20,0,-18),1,null)
+    createCube(2,new three.Vector3(-20,2,-18),1,null)
+    createCube(2,new three.Vector3(-20,4,-18),1,null)
+    createCube(2,new three.Vector3(-20,6,-18),1,null)
+    createCube(2,new three.Vector3(-20,8,-18),1,null)
+    createCube(2,new three.Vector3(-20,10,-18),1,null)
+    createCube(2,new three.Vector3(-20,0,-16),1,null)
+    createCube(2,new three.Vector3(-20,2,-16),1,null)
+    createCube(2,new three.Vector3(-20,4,-16),1,null)
+    createCube(2,new three.Vector3(-20,6,-16),1,null)
+    createCube(2,new three.Vector3(-20,8,-16),1,null)
+    createCube(2,new three.Vector3(-20,10,-16),1,null)
+    createCube(2,new three.Vector3(-20,0,-14),1,null)
+    createCube(2,new three.Vector3(-20,2,-14),1,null)
+    createCube(2,new three.Vector3(-20,4,-14),1,null)
+    createCube(2,new three.Vector3(-20,6,-14),1,null)
+    createCube(2,new three.Vector3(-20,8,-14),1,null)
+    createCube(2,new three.Vector3(-20,10,-14),1,null)
+    createCube(2,new three.Vector3(-20,0,-12),1,null)
+    createCube(2,new three.Vector3(-20,2,-12),1,null)
+    createCube(2,new three.Vector3(-20,4,-12),1,null)
+    createCube(2,new three.Vector3(-20,6,-12),1,null)
+    createCube(2,new three.Vector3(-20,8,-12),1,null)
+    createCube(2,new three.Vector3(-20,10,-12),1,null)
 
 }
 
@@ -65,6 +112,12 @@ function initGraphicsUniverse() {
     directionalLight.position.y = 30
     directionalLight.position.x = -150
     scene.add( directionalLight )
+
+    /********CONTROLS***********/
+    controls=new OrbitControls(camera, renderer.domElement)
+    controls.enableDamping=true
+    controls.dampingFactor=0.05
+    controls.maxPolarAngle=Math.PI/2
 
     add_objects()
 
@@ -93,7 +146,7 @@ function add_objects() {
 function render() {
     let deltaTime = clock.getDelta()
     updatePhysicsUniverse(deltaTime)
-
+    controls.update()
     renderer.render( scene, camera );
 
     //Create the loop
@@ -101,19 +154,28 @@ function render() {
 }
 
 function createCube(scale, position, mass, rot_quaternion) {
+        createParallelepipedRectangle(
+            new three.Vector3(scale,scale,scale),
+            position,mass,rot_quaternion
+        )
+}
+
+function createParallelepipedRectangle(scale, position, mass, rot_quaternion) {
+    let object = new three.Mesh(
+        new three.BoxBufferGeometry(scale.x,scale.y,scale.z),
+        new three.MeshPhongMaterial({color: Math.random()*0xffffff})
+    )
+    object.position.set(position.x,position.y,position.z)
+    scene.add(object)
+    rigidBodies.push(object)
+
+    //Physic universe
     let quaternion
     if (rot_quaternion==null)
         quaternion={x:0,y:0,z:0,w:1}
     else
         quaternion=rot_quaternion
 
-    let cube = new three.Mesh(new three.BoxBufferGeometry(scale,scale,scale),
-        new three.MeshPhongMaterial({color: Math.random()*0xffffff}))
-    cube.position.set(position.x,position.y,position.z)
-    scene.add(cube)
-    rigidBodies.push(cube)
-
-    //Physic universe
     let transform = new Ammo.btTransform()
     transform.setIdentity()
     transform.setOrigin(new Ammo.btVector3(position.x,position.y,position.z))
@@ -121,7 +183,7 @@ function createCube(scale, position, mass, rot_quaternion) {
     let defaultMotionState = new Ammo.btDefaultMotionState(transform)
 
     //Collision
-    let structColShape=new Ammo.btBoxShape(new Ammo.btVector3(scale*0.5,scale*0.5,scale*0.5))
+    let structColShape=new Ammo.btBoxShape(new Ammo.btVector3(scale.x*0.5,scale.y*0.5,scale.z*0.5))
     structColShape.setMargin(0.05)
     //Inertia
     let localInertia = new Ammo.btVector3( 0, 0, 0 )
@@ -130,7 +192,7 @@ function createCube(scale, position, mass, rot_quaternion) {
     let rbody_info = new Ammo.btRigidBodyConstructionInfo(mass, defaultMotionState, structColShape, localInertia)
     let rbody = new Ammo.btRigidBody(rbody_info)
     physicsUniverse.addRigidBody(rbody)
-    cube.userData.physicsBody=rbody
+    object.userData.physicsBody=rbody
 }
 
 function updatePhysicsUniverse(deltaTime) {
@@ -144,48 +206,8 @@ function updatePhysicsUniverse(deltaTime) {
             let new_pos = tmpTransformation.getOrigin()
             let new_qua = tmpTransformation.getRotation()
             graphics_obj.position.set(new_pos.x(),new_pos.y(),new_pos.z())
-            // graphics_obj.quaternion.set(new_qua.x(),new_qua.y(),new_qua.z(),new_qua.w())
+            graphics_obj.quaternion.set(new_qua.x(),new_qua.y(),new_qua.z(),new_qua.w())
         }
     })
 }
 
-document.body.addEventListener("wheel",ev=>{
-    let r = Math.sqrt(Math.pow(camera.position.x,2)+Math.pow(camera.position.z,2))+0.1
-    if (ev.wheelDelta>0) {
-        camera.position.y+=0.1
-        camera.position.x+=camera.position.x/r
-        camera.position.z+=camera.position.z/r
-    } else {
-        camera.position.y-=0.1
-        camera.position.x-=camera.position.x/r
-        camera.position.z-=camera.position.z/r
-    }
-    camera.lookAt(new three.Vector3(0,10,0))
-})
-
-let drag=false, oldX, dX=0, angle=Math.PI
-window.onmousedown=function(event) {
-    drag=true;
-    oldX=event.clientX
-};
-
-window.onmouseup=function() {
-    drag=false;
-};
-
-window.onmousemove=function(event) {
-    if (!drag) return false;
-
-    dX=event.clientX-oldX
-    if (dX>0) {
-        angle -=0.1
-    } else if (dX<0) {
-        angle +=0.1
-    }
-    let r=Math.sqrt(Math.pow(camera.position.x,2)+Math.pow(camera.position.z,2))
-    camera.position.x=r*Math.cos(angle)
-    camera.position.z=r*Math.sin(angle)
-    camera.lookAt(new three.Vector3(0,10,0))
-
-    oldX=event.clientX
-};
