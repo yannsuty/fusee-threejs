@@ -43,7 +43,7 @@ function init() {
 
 function add_objects() {
     /********ANIMATED ROCKET***********/
-    new FBXLoader().load('./assets/models/fusee_anim_9.fbx', (object)=> {
+    new FBXLoader().load('./assets/models/fusee_anim.fbx', (object)=> {
         rocket=object
         rocket.scale.set(1,1,1)
         mixer = new three.AnimationMixer(rocket)
@@ -56,7 +56,11 @@ function add_objects() {
 
 function render() {
     let delta = clock.getDelta()
-    if (rocket) mixer.update(delta)
+    if (rocket)  {
+        mixer.update(delta)
+        rocket.rotation.z+=Math.PI/360
+        rocket.rotation.y+=Math.PI/360
+    }
     controls.update()
     renderer.render( scene, camera );
 
