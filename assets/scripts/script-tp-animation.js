@@ -43,7 +43,7 @@ function init() {
 
 function add_objects() {
     /********ANIMATED ROCKET***********/
-    new FBXLoader().load('./assets/models/fusee_anim_8.fbx', (object)=> {
+    new FBXLoader().load('./assets/models/fusee_anim_9.fbx', (object)=> {
         rocket=object
         rocket.scale.set(1,1,1)
         mixer = new three.AnimationMixer(rocket)
