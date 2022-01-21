@@ -1,9 +1,11 @@
 import * as three from '../../libs/three/three.js'
-import {OrbitControls} from "../../libs/three/OrbitControls.js";
+import {OrbitControls} from "../../libs/three/OrbitControls.js"
+import Stats from "../../libs/Stats.js"
 
 let scene, renderer, camera, controls
 let directionalLight, sun_mesh
 let clock = new three.Clock()
+let stats = Stats()
 
 let rigidBodies = []
 let tmpTransformation
@@ -30,14 +32,14 @@ function AmmoStart() {
 
     //Falling cubes
     createCube(4,new three.Vector3(0,10,0),1)
-    for (let nb=20;nb<=300;nb+=10) {
+    for (let nb=20;nb<=10000;nb+=10) {
         createCube(2,new three.Vector3(0,nb,0),1)
     }
 
     //Wall of cube
     let scale=2
     for (let y=0;y<=10;y+=scale) {
-        for (let z=-20;z<=0;z+=scale) {
+        for (let z=-21;z<=9;z+=scale) {
             createCube(scale, new three.Vector3(-20,y,z),1)
         }
     }
@@ -48,7 +50,7 @@ function initGraphicsUniverse() {
 
     /********RENDERER*********/
     renderer = new three.WebGLRenderer({ antialias: true})
-    renderer.setPixelRatio(window.devicePixelRatio)
+    renderer.setPixelRatio(window.devicePixelRatio*0.8)
     renderer.setSize(window.innerWidth,window.innerHeight)
     renderer.setClearColor(0x8f8f8f)
     renderer.shadowMap.enabled = true
@@ -74,6 +76,9 @@ function initGraphicsUniverse() {
     controls.enableDamping=true
     controls.dampingFactor=0.05
     controls.maxPolarAngle=Math.PI/2
+
+    /********CONTROLS***********/
+    document.getElementById('nav').appendChild(stats.dom)
 
     add_objects()
 
@@ -104,7 +109,7 @@ function render() {
     updatePhysicsUniverse(deltaTime)
     controls.update()
     renderer.render( scene, camera );
-
+    stats.update()
     //Create the loop
     requestAnimationFrame( render );
 }
