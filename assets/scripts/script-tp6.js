@@ -1,8 +1,11 @@
 import * as three from '../../libs/three/three.js'
 import {FBXLoader} from "../../libs/three/FBXLoader.js";
+import {OrbitControls} from "../../libs/three/OrbitControls.js";
+import {VertexNormalsHelper} from "../../libs/three/VertexNormalsHelper.js";
 
-let scene, renderer, camera
+let scene, renderer, camera, controls
 let directionalLight, sun_mesh
+let rocket
 
 function init() {
     scene = new three.Scene()
@@ -23,15 +26,21 @@ function init() {
     /********LIGHTS***********/
     let ambientLight = new three.AmbientLight(0xcccccc,0.2)
     scene.add(ambientLight)
-    directionalLight = new three.DirectionalLight( 0xffffff, 0.6 )
+    directionalLight = new three.PointLight( 0xffffff, 0.6 )
     directionalLight.position.y = 10
-    directionalLight.position.x = -150
+    directionalLight.position.x = -100
     scene.add( directionalLight )
+    scene.add(new three.PointLightHelper(directionalLight,10))
+
+
+    /********CONTROLS***********/
+    controls=new OrbitControls(camera, renderer.domElement)
+    controls.enableDamping=true
+    controls.dampingFactor=0.05
+    controls.maxPolarAngle=Math.PI/2
 
     load_model()
-
     add_objects()
-
     render()
 }
 
@@ -40,7 +49,10 @@ function load_model() {
         .setPath( 'assets/models/' )
         .load( 'fusee_fbx.fbx', function ( object ) {
             object.position.y = 0;
+            rocket=object
             scene.add( object );
+            //scene.add(new three.SkeletonHelper(rocket))
+            //scene.add(new VertexNormalsHelper(rocket.children,0.5,0xff0000))
         } );
 }
 
@@ -64,50 +76,10 @@ function render() {
     directionalLight.position.x = 140*Math.cos(lightAngle)
 
     renderer.render( scene, camera );
+    controls.update()
 
     //Create the loop
     requestAnimationFrame( render );
 }
-
-document.body.addEventListener("wheel",ev=>{
-    let r = Math.sqrt(Math.pow(camera.position.x,2)+Math.pow(camera.position.z,2))+0.1
-    if (ev.wheelDelta>0) {
-        camera.position.y+=0.1
-        camera.position.x+=camera.position.x/r
-        camera.position.z+=camera.position.z/r
-    } else {
-        camera.position.y-=0.1
-        camera.position.x-=camera.position.x/r
-        camera.position.z-=camera.position.z/r
-    }
-    camera.lookAt(new three.Vector3(0,10,0))
-})
-
-let drag=false, oldX, dX=0, angle=Math.PI
-window.onmousedown=function(event) {
-    drag=true;
-    oldX=event.clientX
-};
-
-window.onmouseup=function() {
-    drag=false;
-};
-
-window.onmousemove=function(event) {
-    if (!drag) return false;
-
-    dX=event.clientX-oldX
-    if (dX>0) {
-        angle -=0.1
-    } else if (dX<0) {
-        angle +=0.1
-    }
-    let r=Math.sqrt(Math.pow(camera.position.x,2)+Math.pow(camera.position.z,2))
-    camera.position.x=r*Math.cos(angle)
-    camera.position.z=r*Math.sin(angle)
-    camera.lookAt(new three.Vector3(0,10,0))
-
-    oldX=event.clientX
-};
 
 init()
