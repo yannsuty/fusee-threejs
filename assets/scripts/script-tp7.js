@@ -18,75 +18,29 @@ function AmmoStart() {
 
     //Cube de soutien
     createCube(40,new three.Vector3(-10,-20,-10),0)
+    rigidBodies[0].castShadow=false
+    rigidBodies[0].receiveShadow=true
     //Ramp
     createParallelepipedRectangle(new three.Vector3(10,2,10),new three.Vector3(-10,0,-27),0, {x: 0.383, y: -Math.PI/4, z: 0, w:  0.924})
     //Cube destroyer
     createCube(4,new three.Vector3(-10,500,-27),20)
+    createCube(4,new three.Vector3(-9,1000,-28),20)
+    createCube(4,new three.Vector3(-9,2000,-29),20)
+    createCube(4,new three.Vector3(-9,5000,-29),80)
 
     //Falling cubes
-    createCube(4,new three.Vector3(0,10,0),1,null)
-    createCube(2,new three.Vector3(0,20,0),1,null)
-    createCube(2,new three.Vector3(0,30,0),1,null)
-    createCube(2,new three.Vector3(0,40,0),1,null)
-    createCube(2,new three.Vector3(0,50,0),1,null)
-    createCube(2,new three.Vector3(0,60,0),1,null)
-    createCube(2,new three.Vector3(0,70,0),1,null)
-    createCube(2,new three.Vector3(0,80,0),1,null)
-    createCube(2,new three.Vector3(0,90,0),1,null)
-    createCube(2,new three.Vector3(0,100,0),1,null)
-    createCube(2,new three.Vector3(0,110,0),1,null)
-    createCube(2,new three.Vector3(0,120,0),1,null)
-    createCube(2,new three.Vector3(0,130,0),1,null)
-    createCube(2,new three.Vector3(0,140,0),1,null)
-    createCube(2,new three.Vector3(0,150,0),1,null)
-    createCube(2,new three.Vector3(0,160,0),1,null)
-    createCube(2,new three.Vector3(0,170,0),1,null)
-    createCube(2,new three.Vector3(0,180,0),1,null)
-    createCube(2,new three.Vector3(0,190,0),1,null)
-    createCube(2,new three.Vector3(0,200,0),1,null)
-    createCube(2,new three.Vector3(0,210,0),1,null)
-    createCube(2,new three.Vector3(0,220,0),1,null)
-    createCube(2,new three.Vector3(0,230,0),1,null)
-    createCube(2,new three.Vector3(0,240,0),1,null)
-    createCube(2,new three.Vector3(0,250,0),1,null)
-    createCube(2,new three.Vector3(0,260,0),1,null)
-    createCube(2,new three.Vector3(0,270,0),1,null)
-    createCube(2,new three.Vector3(0,280,0),1,null)
-    createCube(2,new three.Vector3(0,290,0),1,null)
-    createCube(2,new three.Vector3(0,300,0),1,null)
+    createCube(4,new three.Vector3(0,10,0),1)
+    for (let nb=20;nb<=300;nb+=10) {
+        createCube(2,new three.Vector3(0,nb,0),1)
+    }
 
     //Wall of cube
-    createCube(2,new three.Vector3(-20,0,-20),1,null)
-    createCube(2,new three.Vector3(-20,2,-20),1,null)
-    createCube(2,new three.Vector3(-20,4,-20),1,null)
-    createCube(2,new three.Vector3(-20,6,-20),1,null)
-    createCube(2,new three.Vector3(-20,8,-20),1,null)
-    createCube(2,new three.Vector3(-20,10,-20),1,null)
-    createCube(2,new three.Vector3(-20,0,-18),1,null)
-    createCube(2,new three.Vector3(-20,2,-18),1,null)
-    createCube(2,new three.Vector3(-20,4,-18),1,null)
-    createCube(2,new three.Vector3(-20,6,-18),1,null)
-    createCube(2,new three.Vector3(-20,8,-18),1,null)
-    createCube(2,new three.Vector3(-20,10,-18),1,null)
-    createCube(2,new three.Vector3(-20,0,-16),1,null)
-    createCube(2,new three.Vector3(-20,2,-16),1,null)
-    createCube(2,new three.Vector3(-20,4,-16),1,null)
-    createCube(2,new three.Vector3(-20,6,-16),1,null)
-    createCube(2,new three.Vector3(-20,8,-16),1,null)
-    createCube(2,new three.Vector3(-20,10,-16),1,null)
-    createCube(2,new three.Vector3(-20,0,-14),1,null)
-    createCube(2,new three.Vector3(-20,2,-14),1,null)
-    createCube(2,new three.Vector3(-20,4,-14),1,null)
-    createCube(2,new three.Vector3(-20,6,-14),1,null)
-    createCube(2,new three.Vector3(-20,8,-14),1,null)
-    createCube(2,new three.Vector3(-20,10,-14),1,null)
-    createCube(2,new three.Vector3(-20,0,-12),1,null)
-    createCube(2,new three.Vector3(-20,2,-12),1,null)
-    createCube(2,new three.Vector3(-20,4,-12),1,null)
-    createCube(2,new three.Vector3(-20,6,-12),1,null)
-    createCube(2,new three.Vector3(-20,8,-12),1,null)
-    createCube(2,new three.Vector3(-20,10,-12),1,null)
-
+    let scale=2
+    for (let y=0;y<=10;y+=scale) {
+        for (let z=-20;z<=0;z+=scale) {
+            createCube(scale, new three.Vector3(-20,y,z),1)
+        }
+    }
 }
 
 function initGraphicsUniverse() {
@@ -97,20 +51,22 @@ function initGraphicsUniverse() {
     renderer.setPixelRatio(window.devicePixelRatio)
     renderer.setSize(window.innerWidth,window.innerHeight)
     renderer.setClearColor(0x8f8f8f)
+    renderer.shadowMap.enabled = true
     document.body.appendChild(renderer.domElement)
 
     /********CAMERA***********/
     camera = new three.PerspectiveCamera(20, window.innerWidth/window.innerHeight,1,1000)
-    camera.position.set(0,10,300)
+    camera.position.set(0,10,100)
     camera.lookAt(new three.Vector3(0,-30,0))
     scene.add(camera)
 
     /********LIGHTS***********/
     let ambientLight = new three.AmbientLight(0xcccccc,0.2)
     scene.add(ambientLight)
-    directionalLight = new three.DirectionalLight( 0xffffff, 0.6 )
+    directionalLight = new three.PointLight( 0xffffff, 0.6 )
+    directionalLight.castShadow=true
     directionalLight.position.y = 30
-    directionalLight.position.x = -150
+    directionalLight.position.x = -50
     scene.add( directionalLight )
 
     /********CONTROLS***********/
@@ -165,6 +121,7 @@ function createParallelepipedRectangle(scale, position, mass, rot_quaternion) {
         new three.BoxBufferGeometry(scale.x,scale.y,scale.z),
         new three.MeshPhongMaterial({color: Math.random()*0xffffff})
     )
+    object.castShadow=true
     object.position.set(position.x,position.y,position.z)
     scene.add(object)
     rigidBodies.push(object)
