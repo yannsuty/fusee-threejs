@@ -106,6 +106,7 @@ function add_objects() {
 
 function render() {
     let deltaTime = clock.getDelta()
+    createCube(2,new three.Vector3(0,200,0),1)
     updatePhysicsUniverse(deltaTime)
     controls.update()
     renderer.render( scene, camera );
@@ -169,6 +170,11 @@ function updatePhysicsUniverse(deltaTime) {
             let new_qua = tmpTransformation.getRotation()
             graphics_obj.position.set(new_pos.x(),new_pos.y(),new_pos.z())
             graphics_obj.quaternion.set(new_qua.x(),new_qua.y(),new_qua.z(),new_qua.w())
+        }
+        if (graphics_obj.position.y<=-70) {
+            scene.remove(graphics_obj)
+            physicsUniverse.removeRigidBody(physics_obj)
+            rigidBodies.splice(rigidBodies.indexOf(graphics_obj),1)
         }
     })
 }
