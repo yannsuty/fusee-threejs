@@ -32,9 +32,9 @@ function AmmoStart() {
     clickable.shift()
 
     //Wall of cube
-    let scale=5
-    for (let x=-19;x<=19;x+=scale) {
-        for (let z=-19;z<=19;z+=scale) {
+    let scale=2
+    for (let x=-19;x<=19;x+=scale+1) {
+        for (let z=-19;z<=19;z+=scale+1) {
             createCube(scale, new three.Vector3(x,5,z),1)
         }
     }
@@ -150,6 +150,11 @@ function createParallelepipedRectangle(scale, position, mass, rot_quaternion) {
     //Create RigidBody
     let rbody_info = new Ammo.btRigidBodyConstructionInfo(mass, defaultMotionState, structColShape, localInertia)
     let rbody = new Ammo.btRigidBody(rbody_info)
+    //Add friction
+    rbody.setFriction(4)
+    rbody.setRollingFriction(10)
+    //Add activation
+    rbody.setActivationState(4)
     physicsUniverse.addRigidBody(rbody)
     object.userData.physicsBody=rbody
 }
@@ -167,11 +172,11 @@ function updatePhysicsUniverse(deltaTime) {
             graphics_obj.position.set(new_pos.x(),new_pos.y(),new_pos.z())
             graphics_obj.quaternion.set(new_qua.x(),new_qua.y(),new_qua.z(),new_qua.w())
         }
-        if (graphics_obj.position.y<=-70) {
-            scene.remove(graphics_obj)
-            physicsUniverse.removeRigidBody(physics_obj)
-            rigidBodies.splice(rigidBodies.indexOf(graphics_obj),1)
-        }
+        // if (graphics_obj.position.y<=-70) {
+        //     scene.remove(graphics_obj)
+        //     physicsUniverse.removeRigidBody(physics_obj)
+        //     rigidBodies.splice(rigidBodies.indexOf(graphics_obj),1)
+        // }
     })
 }
 
@@ -183,8 +188,8 @@ document.addEventListener('mousedown', event=> {
     let intersect = raycaster.intersectObjects(clickable)
     if (intersect.length == 0)
         return
-    console.log("salut")
     currentObject = intersect[0].object
     currentObject.material.color.set(Math.random()*0xffffff)
+    currentObject.userData.physicsBody.setLinearVelocity(new Ammo.btVector3(0,50,0))
 })
 
