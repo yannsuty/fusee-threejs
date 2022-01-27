@@ -30,9 +30,9 @@ function AmmoStart() {
     createCube(4,new three.Vector3(-9,2000,-29),20)
     createCube(4,new three.Vector3(-9,5000,-29),80)
 
-    //Falling cubes
+    // Falling cubes
     createCube(4,new three.Vector3(0,10,0),1)
-    for (let nb=20;nb<=10000;nb+=10) {
+    for (let nb=20;nb<=5000;nb+=2) {
         createCube(2,new three.Vector3(0,nb,0),1)
     }
 
@@ -106,7 +106,6 @@ function add_objects() {
 
 function render() {
     let deltaTime = clock.getDelta()
-    createCube(2,new three.Vector3(0,200,0),1)
     updatePhysicsUniverse(deltaTime)
     controls.update()
     renderer.render( scene, camera );
