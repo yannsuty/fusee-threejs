@@ -11,6 +11,7 @@ canvas {
 
 nav {
 	position: fixed;
+	top: 0;
 }
 
 button {
@@ -19,4 +20,13 @@ button {
 
 .active button {
 	background-color: green;
+}
+
+footer {
+	position: fixed;
+	bottom: 0;
+}
+
+footer p {
+	margin:0;
 }
