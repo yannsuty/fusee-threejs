@@ -1,18 +1,23 @@
 import * as three from '../../libs/three/three.js'
 import {FBXLoader} from "../../libs/three/FBXLoader.js";
 import {OrbitControls} from "../../libs/three/OrbitControls.js";
+import Stats from "../../libs/Stats.js";
 
 let scene, renderer, camera, controls
 let directionalLight
-let rocket, mixer
+let human_object, mixer_human
 let clock = new three.Clock()
+let stats = Stats()
+let keys={forward:false,left:false,backward:false, right:false,space:false, shift:false}
+let state={idle:true,walk:false,run:false,dance:false}
 
-function init() {
+
+function initGraphicsUniverse() {
     scene = new three.Scene()
 
     /********RENDERER*********/
     renderer = new three.WebGLRenderer({ antialias: true})
-    renderer.setPixelRatio(window.devicePixelRatio)
+    renderer.setPixelRatio(window.devicePixelRatio*0.8)
     renderer.setSize(window.innerWidth,window.innerHeight)
     renderer.setClearColor(0x8f8f8f)
     document.body.appendChild(renderer.domElement)
@@ -37,35 +42,209 @@ function init() {
     controls.dampingFactor=0.05
     controls.maxPolarAngle=Math.PI/2
 
+    /********CONTROLS***********/
+    document.body.appendChild(stats.dom)
+
     add_objects()
     render()
 }
 
 function add_objects() {
-    /********ANIMATED ROCKET***********/
-    new FBXLoader().load('./assets/models/fusee_anim.fbx', (object)=> {
-        rocket=object
-        rocket.scale.set(1,1,1)
-        mixer = new three.AnimationMixer(rocket)
-        let tmp = rocket.animations[0]
-        console.log(rocket.animations)
-        mixer.clipAction(tmp).play()
-        scene.add(rocket)
+    /********FLAT***********/
+    let material_texture = new three.MeshLambertMaterial({color: 0xdcdcdc})
+    let flat = new three.Mesh( new three.BoxGeometry( 150, 1.5, 150 ), material_texture )
+    flat.position.y=-0.6
+    flat.castShadow=false
+    flat.receiveShadow=true
+    scene.add( flat )
+    scene.add(new three.BoxHelper(flat, Math.random()*0xffffff))
+
+    /********HUMAN***********/
+    const fbxloader = new FBXLoader()
+    fbxloader.setPath('./assets/models/human/')
+    fbxloader.load('xbot.fbx', (object)=> {
+        object.scale.set(0.05,0.05,0.05)
+        mixer_human = new three.AnimationMixer(object)
+        scene.add(object)
+        human_object={mesh:object, mixer:mixer_human, animations:{}}
+        /********ANIMATIONS***********/
+        fbxloader.load('Idle.fbx',(anim)=>{human_object.animations['idle']=mixer_human.clipAction(anim.animations[0])})
+        fbxloader.load('Walk.fbx',(anim)=>{human_object.animations['walk']=mixer_human.clipAction(anim.animations[0])})
+        fbxloader.load('Run.fbx',(anim)=>{human_object.animations['run']=mixer_human.clipAction(anim.animations[0])})
+        fbxloader.load('Dance.fbx',(anim)=>{human_object.animations['dance']=mixer_human.clipAction(anim.animations[0])})
     })
+
 }
 
 function render() {
     let delta = clock.getDelta()
-    if (rocket)  {
-        mixer.update(delta)
-        rocket.rotation.z+=Math.PI/360
-        rocket.rotation.y+=Math.PI/360
+    if (human_object)  {
+        human_object.mixer.update(delta)
     }
+    updatePosition()
+    updateKeyControl()
     controls.update()
+    stats.update()
     renderer.render( scene, camera );
 
     //Create the loop
     requestAnimationFrame( render );
 }
 
-init()
+function updatePosition() {
+
+}
+
+function updateKeyControl() {
+    if (keys.forward) {
+        if (keys.shift) {
+            changeStateToRun()
+        } else if(keys.forward) {
+            changeStateToWalk()
+        }
+    } else if (keys.space) {
+        changeStateToDance()
+    } else {
+        changeStateToIdle()
+    }
+}
+
+function changeStateToWalk() {
+    if (state.walk) {
+        return
+    } else {
+        const curAction = human_object.animations['walk']
+        let prevAction
+        state.walk=true
+        if (state.run) {
+            state.run=false
+            prevAction=human_object.animations['run']
+        } else if (state.idle) {
+            state.idle=false
+            prevAction=human_object.animations['idle']
+        } else {
+            return false
+        }
+        curAction.reset()
+        curAction.clampWhenFinished = false
+        curAction.crossFadeFrom(prevAction, 0.3, true)
+        curAction.play()
+    }
+}
+
+function changeStateToRun() {
+    if (state.run) {
+        return
+    } else {
+        const curAction = human_object.animations['run']
+        let prevAction
+        state.run=true
+        if (state.walk) {
+            state.walk=false
+            prevAction=human_object.animations['walk']
+        } else if (state.idle) {
+            state.idle=false
+            prevAction=human_object.animations['idle']
+        } else {
+            return false
+        }
+        curAction.reset()
+        curAction.clampWhenFinished = false
+        curAction.crossFadeFrom(prevAction, 0.2, true)
+        curAction.play()
+    }
+}
+
+function changeStateToDance() {
+    if (state.dance) {
+        return
+    } else {
+        const curAction = human_object.animations['dance']
+        let prevAction
+        state.dance=true
+        if (state.idle) {
+            state.idle=false
+            prevAction=human_object.animations['idle']
+        } else {
+            return false
+        }
+        curAction.reset()
+        curAction.clampWhenFinished = false
+        curAction.crossFadeFrom(prevAction, 0.2, true)
+        curAction.play()
+    }
+}
+
+function changeStateToIdle() {
+    if (state.idle) {
+        return
+    } else {
+        const curAction = human_object.animations['idle']
+        let prevAction
+        state.idle=true
+        if (state.run) {
+            state.run=false
+            prevAction=human_object.animations['run']
+        } else if (state.walk) {
+            state.walk=false
+            prevAction=human_object.animations['walk']
+        } else if (state.dance) {
+            state.dance=false
+            prevAction=human_object.animations['dance']
+        }
+        curAction.reset()
+        curAction.clampWhenFinished = false
+        curAction.crossFadeFrom(prevAction, 0.2, true)
+        curAction.play()
+    }
+}
+
+let keyPressed={}
+document.addEventListener('keydown',ev=> {
+    keyPressed[ev.key]=true
+    keySwitch(true, ev.key)
+})
+
+document.addEventListener('keyup',ev=> {
+    keyPressed[ev.key]=false
+    keySwitch(false, ev.key)
+})
+
+function keySwitch(revert, key) {
+    switch (key) {
+        case 'z':
+            keys.forward=revert
+            break
+        case 'q':
+            keys.left=revert
+            break
+        case 's':
+            keys.backward=revert
+            break
+        case 'd':
+            keys.right=revert
+            break
+        case ' ':
+            keys.space=revert
+            break
+        case 'Shift':
+            keys.shift=revert
+            break
+    }
+    // if (keyPressed['z'])
+    //     keys.forward=revert
+    // if (keyPressed['q'])
+    //     keys.left=revert
+    // if (keyPressed['s'])
+    //     keys.backward=revert
+    // if (keyPressed['d'])
+    //     keys.right=revert
+    // if (keyPressed[' '])
+    //     keys.space=revert
+    // if (keyPressed['Shift'])
+    //     keys.shift=revert
+    // if (key)
+    //     keyPressed[key]=false
+}
+
+initGraphicsUniverse()
