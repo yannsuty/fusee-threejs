@@ -1,11 +1,10 @@
 import * as three from '../../libs/three/three.js'
 import {FBXLoader} from "../../libs/three/FBXLoader.js";
 import {OrbitControls} from "../../libs/three/OrbitControls.js";
-import {VertexNormalsHelper} from "../../libs/three/VertexNormalsHelper.js";
 
 let scene, renderer, camera, controls
 let directionalLight, sun_mesh
-let rocket
+let rockets=[]
 
 function init() {
     scene = new three.Scene()
@@ -41,7 +40,6 @@ function init() {
 
     load_model()
     add_objects()
-    render()
 }
 
 function load_model() {
@@ -49,10 +47,11 @@ function load_model() {
         .setPath( 'assets/models/' )
         .load( 'fusee_fbx.fbx', function ( object ) {
             object.position.y = 0;
-            rocket=object
+            rockets.push({rocket:object, v:0})
             scene.add( object );
             //scene.add(new three.SkeletonHelper(rocket))
             //scene.add(new VertexNormalsHelper(rocket.children,0.5,0xff0000))
+            render()
         } );
 }
 
@@ -67,7 +66,7 @@ function add_objects() {
     scene.add(sun_mesh)
 }
 
-let lightAngle=0
+let lightAngle=0, compteur=0, max=50
 function render() {
     lightAngle+=0.005
     sun_mesh.position.x=150*Math.cos(lightAngle)
@@ -75,6 +74,20 @@ function render() {
     directionalLight.position.z = 140*Math.sin(lightAngle)
     directionalLight.position.x = 140*Math.cos(lightAngle)
 
+    if (compteur++%max==0) {
+        let rocket = rockets[0].rocket.clone()
+        rocket.position.y=0
+        rocket.position.x=Math.random()*max-max/2
+        rocket.position.z=Math.random()*max-max/2
+        scene.add(rocket)
+        rockets.push({rocket:rocket,v:0})
+    }
+    rockets.forEach(rocket=> {
+        rocket.rocket.position.y+=rocket.v
+        rocket.v+=0.001
+        if (rockets[0].rocket.position.y>500)
+            rockets.shift()
+    })
     renderer.render( scene, camera );
     controls.update()
 
