@@ -63,10 +63,11 @@ function add_objects() {
     const fbxloader = new FBXLoader()
     fbxloader.setPath('./assets/models/human/')
     fbxloader.load('xbot.fbx', (object)=> {
-        object.scale.set(0.05,0.05,0.05)
+        object.scale.set(0.005,0.005,0.005)
+        object.position.y=0.15
         mixer_human = new three.AnimationMixer(object)
         scene.add(object)
-        human_object={mesh:object, mixer:mixer_human, animations:{}}
+        human_object={mesh:object, mixer:mixer_human, animations:{}, velocity:new three.Vector3(0,0,0)}
         /********ANIMATIONS***********/
         fbxloader.load('Idle.fbx',(anim)=>{human_object.animations['idle']=mixer_human.clipAction(anim.animations[0])})
         fbxloader.load('Walk.fbx',(anim)=>{human_object.animations['walk']=mixer_human.clipAction(anim.animations[0])})
@@ -80,8 +81,8 @@ function render() {
     let delta = clock.getDelta()
     if (human_object)  {
         human_object.mixer.update(delta)
+        updatePosition()
     }
-    updatePosition()
     updateKeyControl()
     controls.update()
     stats.update()
@@ -92,14 +93,43 @@ function render() {
 }
 
 function updatePosition() {
+    if (keys.forward) {
+        human_object.velocity=calcVelocity()
+        if (keys.shift) {
+            human_object.velocity=calcVelocity(true)
+        }
+        if (keys.left) {
+            human_object.mesh.rotation.y+=0.05
+        } else if (keys.right) {
+            human_object.mesh.rotation.y-=0.05
+        }
+    } else {
+        human_object.velocity.z=0
+        human_object.velocity.x=0
+    }
+    human_object.mesh.position.z+=human_object.velocity.z
+    human_object.mesh.position.x+=human_object.velocity.x
+    human_object.mesh.position.y+=human_object.velocity.y
+}
 
+function calcVelocity(run=false) {
+    const velocity = new three.Vector3(0,0,0)
+    let speed=0.01
+    if (run) speed+=0.015
+
+    const rotation = human_object.mesh.rotation.clone()
+
+    velocity.x=speed*Math.sin(rotation.y)
+    velocity.z=speed*Math.cos(rotation.y)
+
+    return velocity
 }
 
 function updateKeyControl() {
     if (keys.forward) {
         if (keys.shift) {
             changeStateToRun()
-        } else if(keys.forward) {
+        } else {
             changeStateToWalk()
         }
     } else if (keys.space) {
@@ -203,12 +233,12 @@ let keyPressed={}
 document.addEventListener('keydown',ev=> {
     keyPressed[ev.key]=true
     keySwitch(true, ev.key)
-})
+}, false)
 
 document.addEventListener('keyup',ev=> {
     keyPressed[ev.key]=false
     keySwitch(false, ev.key)
-})
+}, false)
 
 function keySwitch(revert, key) {
     switch (key) {
