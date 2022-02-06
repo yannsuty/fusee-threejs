@@ -9,6 +9,7 @@ let human_object, mixer_human
 let clock = new three.Clock()
 let stats = Stats()
 let keys={forward:false,left:false,backward:false, right:false,space:false, shift:false}
+let keyConvert={z:'forward',q:'left',s:'backward',d:'right',' ':'space',Shift:'shift'}
 let state={idle:true,walk:false,run:false,dance:false}
 
 
@@ -95,13 +96,13 @@ function render() {
 function updatePosition() {
     if (keys.forward) {
         human_object.velocity=calcVelocity()
-        if (keys.shift) {
-            human_object.velocity=calcVelocity(true)
-        }
         if (keys.left) {
             human_object.mesh.rotation.y+=0.05
         } else if (keys.right) {
             human_object.mesh.rotation.y-=0.05
+        }
+        if (keys.shift) {
+            human_object.velocity=calcVelocity(true)
         }
     } else {
         human_object.velocity.z=0
@@ -115,7 +116,7 @@ function updatePosition() {
 function calcVelocity(run=false) {
     const velocity = new three.Vector3(0,0,0)
     let speed=0.01
-    if (run) speed+=0.015
+    if (run) speed+=0.025
 
     const rotation = human_object.mesh.rotation.clone()
 
@@ -156,7 +157,6 @@ function changeStateToWalk() {
             return false
         }
         curAction.reset()
-        curAction.clampWhenFinished = false
         curAction.crossFadeFrom(prevAction, 0.3, true)
         curAction.play()
     }
@@ -179,7 +179,6 @@ function changeStateToRun() {
             return false
         }
         curAction.reset()
-        curAction.clampWhenFinished = false
         curAction.crossFadeFrom(prevAction, 0.2, true)
         curAction.play()
     }
@@ -199,8 +198,7 @@ function changeStateToDance() {
             return false
         }
         curAction.reset()
-        curAction.clampWhenFinished = false
-        curAction.crossFadeFrom(prevAction, 0.2, true)
+        curAction.crossFadeFrom(prevAction, 0.3, true)
         curAction.play()
     }
 }
@@ -223,58 +221,23 @@ function changeStateToIdle() {
             prevAction=human_object.animations['dance']
         }
         curAction.reset()
-        curAction.clampWhenFinished = false
         curAction.crossFadeFrom(prevAction, 0.2, true)
         curAction.play()
     }
 }
 
-let keyPressed={}
 document.addEventListener('keydown',ev=> {
-    keyPressed[ev.key]=true
     keySwitch(true, ev.key)
+    //console.log(ev.getModifierState('Shift'))
 }, false)
 
 document.addEventListener('keyup',ev=> {
-    keyPressed[ev.key]=false
     keySwitch(false, ev.key)
 }, false)
 
 function keySwitch(revert, key) {
-    switch (key) {
-        case 'z':
-            keys.forward=revert
-            break
-        case 'q':
-            keys.left=revert
-            break
-        case 's':
-            keys.backward=revert
-            break
-        case 'd':
-            keys.right=revert
-            break
-        case ' ':
-            keys.space=revert
-            break
-        case 'Shift':
-            keys.shift=revert
-            break
-    }
-    // if (keyPressed['z'])
-    //     keys.forward=revert
-    // if (keyPressed['q'])
-    //     keys.left=revert
-    // if (keyPressed['s'])
-    //     keys.backward=revert
-    // if (keyPressed['d'])
-    //     keys.right=revert
-    // if (keyPressed[' '])
-    //     keys.space=revert
-    // if (keyPressed['Shift'])
-    //     keys.shift=revert
-    // if (key)
-    //     keyPressed[key]=false
+    console.log(keys)
+    keys[keyConvert[key]]=revert
 }
 
 initGraphicsUniverse()
