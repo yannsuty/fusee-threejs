@@ -73,8 +73,8 @@ function initGraphicsUniverse() {
     controls.dampingFactor=0.05
     controls.maxPolarAngle=Math.PI/2
 
-    /********CONTROLS***********/
-    document.getElementById('nav').appendChild(stats.dom)
+    /********STATS***********/
+    document.body.appendChild(stats.dom)
 
     add_objects()
 

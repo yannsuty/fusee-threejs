@@ -47,13 +47,13 @@ function add_objects() {
     /********LOAD PARTICLE***********/
     particleTexture = loader.load( 'assets/images/firefly.png')
 
-    /********LOAD PARTICLE***********/
+    /********LOAD ASTEROID***********/
     let particleTextureAsteroid = loader.load( 'assets/images/asteroid.png')
     spriteMaterialAsteroid = new three.SpriteMaterial( { map: particleTextureAsteroid, transparent : true, opacity : 1, color: 0x333333 } )
 }
 let compteur=0
 function asteroidsRender() {
-    /********GENERATE ASTEROIDE***********/
+    /********GENERATE ASTEROID***********/
     if (compteur++%3==0) {
         let asteroid = new three.Sprite(spriteMaterialAsteroid)
         asteroid.position.y = 5
